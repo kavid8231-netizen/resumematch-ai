@@ -1,0 +1,60 @@
+{
+  "roles": [
+    {
+      "id": "web-developer",
+      "role": "Web Developer",
+      "icon": "Code",
+      "description": "Build and maintain websites and web applications",
+      "skills": ["HTML", "CSS", "JavaScript", "React", "Node.js", "TypeScript", "Git", "REST API", "Responsive Design", "Webpack"]
+    },
+    {
+      "id": "data-analyst",
+      "role": "Data Analyst",
+      "icon": "BarChart3",
+      "description": "Analyze data to drive business decisions",
+      "skills": ["Python", "SQL", "Excel", "Tableau", "Power BI", "Statistics", "Data Visualization", "R", "Pandas", "Machine Learning"]
+    },
+    {
+      "id": "ui-ux-designer",
+      "role": "UI/UX Designer",
+      "icon": "Palette",
+      "description": "Design intuitive and beautiful user interfaces",
+      "skills": ["Figma", "Adobe XD", "Sketch", "Prototyping", "User Research", "Wireframing", "Design Systems", "CSS", "HTML", "Accessibility"]
+    },
+    {
+      "id": "backend-developer",
+      "role": "Backend Developer",
+      "icon": "Server",
+      "description": "Build server-side logic and databases",
+      "skills": ["Python", "Java", "Node.js", "SQL", "MongoDB", "REST API", "Docker", "AWS", "Microservices", "Redis"]
+    },
+    {
+      "id": "devops-engineer",
+      "role": "DevOps Engineer",
+      "icon": "Cloud",
+      "description": "Manage infrastructure and deployment pipelines",
+      "skills": ["Docker", "Kubernetes", "AWS", "CI/CD", "Linux", "Terraform", "Jenkins", "Git", "Python", "Bash"]
+    },
+    {
+      "id": "mobile-developer",
+      "role": "Mobile Developer",
+      "icon": "Smartphone",
+      "description": "Create native and cross-platform mobile apps",
+      "skills": ["React Native", "Flutter", "Swift", "Kotlin", "iOS", "Android", "REST API", "Firebase", "Git", "UI/UX"]
+    },
+    {
+      "id": "machine-learning-engineer",
+      "role": "ML Engineer",
+      "icon": "Brain",
+      "description": "Build and deploy machine learning models",
+      "skills": ["Python", "TensorFlow", "PyTorch", "Machine Learning", "Deep Learning", "NLP", "Computer Vision", "SQL", "Docker", "AWS"]
+    },
+    {
+      "id": "project-manager",
+      "role": "Project Manager",
+      "icon": "ClipboardList",
+      "description": "Lead teams and manage project delivery",
+      "skills": ["Agile", "Scrum", "JIRA", "Communication", "Leadership", "Risk Management", "Stakeholder Management", "MS Project", "Budgeting", "Team Management"]
+    }
+  ]
+}
