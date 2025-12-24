@@ -22,18 +22,122 @@ const commonSkills = [
   "Webpack", "Vite", "Babel", "ESLint", "Prettier"
 ];
 
+// Words to ignore when detecting names
+const ignoreWords = [
+  "resume", "curriculum", "vitae", "cv", "profile", "objective", 
+  "summary", "contact", "details", "information", "personal"
+];
+
+// Extract name from resume text
+const extractName = (text: string): string => {
+  const lines = text.split(/\n/).map(line => line.trim()).filter(line => line.length > 0);
+  
+  // Method 1: Check first few lines for a name pattern
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    const line = lines[i];
+    
+    // Skip lines with ignored words
+    if (ignoreWords.some(word => line.toLowerCase().includes(word))) {
+      continue;
+    }
+    
+    // Skip lines with email, phone, or URLs
+    if (line.includes("@") || line.match(/\d{3}/) || line.includes("http") || line.includes("www")) {
+      continue;
+    }
+    
+    // Check if line is mostly alphabetic with spaces (typical name pattern)
+    const cleanLine = line.replace(/[^a-zA-Z\s]/g, "").trim();
+    if (cleanLine.length > 3 && cleanLine.split(/\s+/).length >= 2 && cleanLine.split(/\s+/).length <= 4) {
+      // Verify it looks like a name (capitalized words)
+      const words = cleanLine.split(/\s+/);
+      const isName = words.every(word => /^[A-Z][a-z]*$/.test(word) || /^[A-Z]+$/.test(word));
+      if (isName || words.length >= 2) {
+        return cleanLine;
+      }
+    }
+  }
+  
+  // Method 2: Look for "Name:" pattern
+  const namePattern = /(?:name\s*[:\-]\s*)([A-Za-z]+(?:\s+[A-Za-z]+)+)/i;
+  const nameMatch = text.match(namePattern);
+  if (nameMatch) {
+    return nameMatch[1].trim();
+  }
+  
+  // Method 3: Find first occurrence of 2-4 capitalized words together
+  const capitalizedNamePattern = /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})$/m;
+  const capMatch = text.match(capitalizedNamePattern);
+  if (capMatch) {
+    const potential = capMatch[1].trim();
+    if (!ignoreWords.some(word => potential.toLowerCase().includes(word))) {
+      return potential;
+    }
+  }
+  
+  return "Not detected";
+};
+
+// Extract phone number from resume text
+const extractPhone = (text: string): string => {
+  // Remove all whitespace for easier matching
+  const cleanText = text.replace(/\s+/g, " ");
+  
+  // Phone patterns to match various formats
+  const phonePatterns = [
+    // +91 followed by 10 digits (with optional separators)
+    /\+91[-.\s]?(\d{10})/,
+    /\+91[-.\s]?(\d{5})[-.\s]?(\d{5})/,
+    // Country code formats
+    /\+\d{1,3}[-.\s]?(\d{10})/,
+    /\+\d{1,3}[-.\s]?(\d{3})[-.\s]?(\d{3})[-.\s]?(\d{4})/,
+    // 10 digit formats
+    /(?:^|\s)(\d{10})(?:\s|$)/,
+    /(?:^|\s)(\d{3})[-.\s](\d{3})[-.\s](\d{4})(?:\s|$)/,
+    /(?:^|\s)(\d{5})[-.\s](\d{5})(?:\s|$)/,
+    // With parentheses
+    /\((\d{3})\)[-.\s]?(\d{3})[-.\s]?(\d{4})/,
+    // Phone/Mobile label patterns
+    /(?:phone|mobile|tel|cell|contact)[-:\s]*\+?\d*[-.\s]?(\d{10})/i,
+    /(?:phone|mobile|tel|cell|contact)[-:\s]*\+?\d*[-.\s]?(\d{3})[-.\s]?(\d{3})[-.\s]?(\d{4})/i,
+  ];
+  
+  for (const pattern of phonePatterns) {
+    const match = cleanText.match(pattern);
+    if (match) {
+      // Extract only digits from the match
+      const digits = match.slice(1).join("").replace(/\D/g, "");
+      
+      // Validate length (10-13 digits)
+      if (digits.length >= 10 && digits.length <= 13) {
+        // Return last 10 digits for consistency (removes country code)
+        return digits.slice(-10);
+      }
+    }
+  }
+  
+  // Fallback: Find any sequence of 10+ digits
+  const allDigits = text.match(/\d{10,13}/g);
+  if (allDigits) {
+    for (const digits of allDigits) {
+      // Return last 10 digits
+      return digits.slice(-10);
+    }
+  }
+  
+  return "Not detected";
+};
+
 export const parseResumeText = (text: string): ParsedResume => {
-  // Extract name (usually first line or after "Name:")
-  const nameMatch = text.match(/(?:name[:\s]*)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i);
-  const name = nameMatch ? nameMatch[1].trim() : "Not Found";
+  // Extract name using enhanced logic
+  const name = extractName(text);
 
   // Extract email
   const emailMatch = text.match(/[\w.-]+@[\w.-]+\.\w+/);
-  const email = emailMatch ? emailMatch[0] : "Not Found";
+  const email = emailMatch ? emailMatch[0] : "Not detected";
 
-  // Extract phone
-  const phoneMatch = text.match(/(?:\+\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
-  const phone = phoneMatch ? phoneMatch[0] : "Not Found";
+  // Extract phone using enhanced logic
+  const phone = extractPhone(text);
 
   // Extract skills
   const textLower = text.toLowerCase();
@@ -64,8 +168,8 @@ export const parseResumeText = (text: string): ParsedResume => {
   // If no education found, add a placeholder
   if (educationMatches.length === 0) {
     educationMatches.push({
-      degree: "Degree information not detected",
-      institution: "Please update manually",
+      degree: "Not detected",
+      institution: "Not detected",
       year: "N/A"
     });
   }
@@ -93,10 +197,10 @@ export const parseResumeText = (text: string): ParsedResume => {
   // If no experience found, add a placeholder
   if (experienceMatches.length === 0) {
     experienceMatches.push({
-      title: "Experience information not detected",
-      company: "Please update manually",
+      title: "Not detected",
+      company: "Not detected",
       duration: "N/A",
-      description: "Upload a more detailed resume for better parsing"
+      description: "Experience not detected from resume"
     });
   }
 
@@ -104,7 +208,7 @@ export const parseResumeText = (text: string): ParsedResume => {
     name,
     email,
     phone,
-    skills: foundSkills.length > 0 ? foundSkills : ["No skills detected - please update manually"],
+    skills: foundSkills.length > 0 ? foundSkills : ["No skills detected"],
     education: educationMatches,
     experience: experienceMatches
   };
